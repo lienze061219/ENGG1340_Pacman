@@ -31,4 +31,4 @@ int Player::getX() const {
 
 int Player::getY() const {
     return y;
-}
+} 
