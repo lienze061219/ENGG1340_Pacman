@@ -1,53 +1,96 @@
 #include "Map.h"
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <algorithm>
 
-bool Map::loadFromFile(std::string filename) {
-    std::ifstream file(filename);
-    if (!file.is_open()) return false;
-    std::string line;
-    data.clear();
-    while (getline(file, line)) {
-        std::vector<char> row(line.begin(), line.end());
-        data.push_back(row);
-    }
-    file.close();
+// 辅助：检查坐标是否在地图范围内
+bool Map::inBounds(int x, int y) const {
+    if (y < 0 || y >= static_cast<int>(data.size())) return false;
+    if (x < 0 || x >= static_cast<int>(data[y].size())) return false;
     return true;
 }
 
-void Map::display(int px, int py, int gx, int gy) {
-    std::cout << "\033[2J\033[1;1H"; // 清屏
-    for (int y = 0; y < data.size(); y++) {
-        for (int x = 0; x < data[y].size(); x++) {
-            if (x == px && y == py) std::cout << "P "; // 画玩家
-            else if (x == gx && y == gy) std::cout << "G "; // 画幽灵
-            else std::cout << data[y][x] << " "; // 画墙或豆子
+bool Map::loadFromFile(const std::string& filename) {
+    std::ifstream in(filename);
+    if (!in.is_open()) return false;
+
+    data.clear();
+    std::string line;
+    while (std::getline(in, line)) {
+        std::vector<char> row;
+        row.reserve(line.size());
+        for (char c : line) row.push_back(c);
+        data.push_back(std::move(row));
+    }
+    in.close();
+
+    // 如果某些行长度不一致，可以选择填充空格使矩阵更规整
+    size_t maxlen = 0;
+    for (const auto& row : data) if (row.size() > maxlen) maxlen = row.size();
+    for (auto& row : data) {
+        if (row.size() < maxlen) row.resize(maxlen, ' ');
+    }
+
+    return !data.empty();
+}
+
+void Map::display(int px, int py, int gx, int gy) const {
+    for (int y = 0; y < static_cast<int>(data.size()); ++y) {
+        for (int x = 0; x < static_cast<int>(data[y].size()); ++x) {
+            if (x == px && y == py && x == gx && y == gy) {
+                std::cout << 'X'; // 玩家与幽灵同格，表示碰撞
+            } else if (x == px && y == py) {
+                std::cout << 'P';
+            } else if (x == gx && y == gy) {
+                std::cout << 'G';
+            } else {
+                std::cout << data[y][x];
+            }
         }
-        std::cout << "\n";
+        std::cout << '\n';
     }
 }
 
-bool Map::isSafe(int x, int y) {
-    // 越界保护：如果坐标超出地图范围，直接返回 false
-    if (y < 0 || y >= data.size() || x < 0 || x >= data[y].size()) return false;
-    // 碰撞检查：如果是 '#' 则不可通行
+bool Map::isSafe(int x, int y) const {
+    if (!inBounds(x, y)) return false;
+    // 约定 '#' 为墙，其他字符均可通行
     return data[y][x] != '#';
 }
 
 void Map::eatBean(int x, int y) {
-    // 检查坐标合法性
-    if (y >= 0 && y < data.size() && x >= 0 && x < data[y].size()) {
-        if (data[y][x] == '.') { // 如果是豆子
-            data[y][x] = ' ';   // 把它改为空格（代表吃掉了）
-        }
+    if (!inBounds(x, y)) return;
+    // 约定 '.' 为普通豆子，'o' 可作为能量豆，下面示例同时处理两种
+    if (data[y][x] == '.' || data[y][x] == 'o') {
+        data[y][x] = ' '; // 吃掉后变为空格
     }
 }
 
-bool Map::hasBeans() {
+int Map::getWidth() const {
+    if (data.empty()) return 0;
+    return static_cast<int>(data[0].size());
+}
+
+int Map::getHeight() const {
+    return static_cast<int>(data.size());
+}
+
+int Map::countBeans() const {
+    int cnt = 0;
     for (const auto& row : data) {
         for (char c : row) {
-            if (c == '.') return true; // 还有豆子
+            if (c == '.' || c == 'o') ++cnt;
         }
     }
-    return false; // 豆子吃光了
+    return cnt;
+}
+
+bool Map::saveToFile(const std::string& filename) const {
+    std::ofstream out(filename);
+    if (!out.is_open()) return false;
+    for (const auto& row : data) {
+        for (char c : row) out << c;
+        out << '\n';
+    }
+    out.close();
+    return true;
 }
