@@ -27,6 +27,9 @@ public:
     // 统计并返回当前剩余豆子数量
     int countBeans() const;
 
+    // 检查是否还有豆子
+    bool hasBeans() const;
+
     // 可选：把当前地图保存回文件（用于调试或持久化）
     bool saveToFile(const std::string& filename) const;
 
