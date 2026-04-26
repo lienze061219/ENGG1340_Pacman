@@ -1,6 +1,6 @@
 #include "Ghost.h"
 #include <cstdlib>
-using namespac std;
+using namespace std;
 
 /*
  * What it does: 构造函数，初始化幽灵在地图上的初始坐标。
