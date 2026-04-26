@@ -84,6 +84,10 @@ int Map::countBeans() const {
     return cnt;
 }
 
+bool Map::hasBeans() const {
+    return countBeans() > 0;
+}
+
 bool Map::saveToFile(const std::string& filename) const {
     std::ofstream out(filename);
     if (!out.is_open()) return false;
