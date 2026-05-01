@@ -1,64 +1,97 @@
 #include "Ghost.h"
 #include <cstdlib>
-using namespace std;
+#include <queue>
+#include <algorithm>
 
-/*
- * What it does: 构造函数，初始化幽灵在地图上的初始坐标。
- * Inputs: startX (初始的 X 坐标), startY (初始的 Y 坐标)
- * Outputs: 无
- */
-Ghost::Ghost(int startX, int startY) : x(startX), y(startY) {}
+Ghost::Ghost(int sx, int sy, GhostBehavior b, double interval)
+    : x(sx), y(sy), behavior(b), moveInterval(interval), nextMoveTime(0) {}
 
-/*
- * What it does: 每帧被系统组调用，更新幽灵的当前状态。目前阶段执行随机移动。
- * Inputs: m (Map 对象的常量引用，用于获取地图的地形信息)
- * Outputs: 无 (修改自身的 x, y 坐标)
- */
-void Ghost::update(const Map &m) {
-    moveRandomly(m);
+void Ghost::update(double ct, const Map& m, int px, int py) {
+    if (ct < nextMoveTime) return;
+    nextMoveTime = ct + moveInterval;
+    if (behavior == RANDOM) moveRandomly(m);
+    else moveTowardsPlayer(m, px, py);
 }
 
-/*
- * What it does: 实现幽灵的随机移动逻辑，四个方向随机选择，碰到墙壁则停留在原地。
- * Inputs: m (Map 对象的常量引用)
- * Outputs: 无 (如果判断通过，修改自身的 x, y 坐标)
- */
-void Ghost::moveRandomly(const Map &m) {
-    int dir = rand() % 4; 
-
-    int nextX = x;
-    int nextY = y;
-
-    if (dir == 0) {
-        nextY -= 1;
-    } else if (dir == 1) {
-        nextY += 1;
-    } else if (dir == 2) {
-        nextX -= 1;
-    } else if (dir == 3) {
-        nextX += 1;
+void Ghost::moveRandomly(const Map& m) {
+    int dir = rand() % 4;
+    int nx = x, ny = y;
+    switch (dir) {
+        case 0: ny--; break;
+        case 1: ny++; break;
+        case 2: nx--; break;
+        case 3: nx++; break;
     }
-
-    if (m.isSafe(nextX, nextY)) {
-        x = nextX;
-        y = nextY;
+    // 确保移动后的坐标在地图内且安全
+    if (nx >= 0 && nx < m.getWidth() && ny >= 0 && ny < m.getHeight() && m.isSafe(nx, ny)) {
+        x = nx; y = ny;
     }
 }
 
-/*
- * What it does: 获取幽灵当前的 X 坐标。
- * Inputs: 无
- * Outputs: 幽灵当前的 X 坐标 (int)
- */
-int Ghost::getX() const {
-    return x;
+std::pair<int,int> Ghost::bfsNextStep(const Map& m, int tx, int ty) const {
+    int w = m.getWidth(), h = m.getHeight();
+    
+    // 校验目标点（玩家）是否在合法范围内
+    if (tx < 0 || tx >= w || ty < 0 || ty >= h) return {x, y};
+    // 校验起点（幽灵自身）是否在合法范围内
+    if (x < 0 || x >= w || y < 0 || y >= h) return {x, y};
+
+    std::vector<std::vector<bool>> vis(h, std::vector<bool>(w, false));
+    std::vector<std::vector<std::pair<int,int>>> parent(h, std::vector<std::pair<int,int>>(w, {-1,-1}));
+    
+    std::queue<std::pair<int,int>> q;
+    q.push({x, y});
+    vis[y][x] = true;
+
+    int dx[] = {0,0,-1,1}, dy[] = {-1,1,0,0};
+    bool found = false;
+
+    while (!q.empty()) {
+        auto cur = q.front(); q.pop();
+        int cx = cur.first, cy = cur.second;
+        if (cx == tx && cy == ty) {
+            found = true;
+            break;
+        }
+        for (int i = 0; i < 4; ++i) {
+            int nx = cx + dx[i], ny = cy + dy[i];
+            // 显式的边界检查，防止 vis[ny][nx] 越界
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h && m.isSafe(nx, ny) && !vis[ny][nx]) {
+                vis[ny][nx] = true;
+                parent[ny][nx] = {cx, cy};
+                q.push({nx, ny});
+            }
+        }
+    }
+
+    // 如果没找到路径，不执行回溯，直接返回原地或随机
+    if (!found) return {x, y};
+
+    int cx = tx, cy = ty;
+    // 回溯直到找到起点的下一步
+    while (parent[cy][cx].first != -1) {
+        std::pair<int,int> p = parent[cy][cx];
+        if (p.first == x && p.second == y) return {cx, cy};
+        cx = p.first;
+        cy = p.second;
+    }
+    
+    return {x, y};
 }
 
-/*
- * What it does: 获取幽灵当前的 Y 坐标。
- * Inputs: 无
- * Outputs: 幽灵当前的 Y 坐标 (int)
- */
-int Ghost::getY() const {
-    return y;
+void Ghost::moveTowardsPlayer(const Map& m, int px, int py) {
+    auto nxt = bfsNextStep(m, px, py);
+    int nx = nxt.first, ny = nxt.second;
+    // 再次确认安全性
+    if ((nx != x || ny != y) && nx >= 0 && nx < m.getWidth() && ny >= 0 && ny < m.getHeight() && m.isSafe(nx, ny)) {
+        x = nx; y = ny;
+    } else {
+        moveRandomly(m);
+    }
 }
+// 其他 getter/setter 保持不变...
+
+int Ghost::getX() const { return x; }
+int Ghost::getY() const { return y; }
+void Ghost::setBehavior(GhostBehavior b) { behavior = b; }
+double Ghost::getMoveInterval() const { return moveInterval; }
