@@ -33,6 +33,10 @@ public:
     // 可选：把当前地图保存回文件（用于调试或持久化）
     bool saveToFile(const std::string& filename) const;
 
+    // 读取/写入单个格子（用于道具、实体叠加渲染）
+    char getTile(int x, int y) const;
+    void setTile(int x, int y, char tile);
+
 private:
     // data[y][x] 表示第 y 行第 x 列字符
     std::vector<std::vector<char>> data;

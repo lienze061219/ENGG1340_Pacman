@@ -98,3 +98,13 @@ bool Map::saveToFile(const std::string& filename) const {
     out.close();
     return true;
 }
+
+char Map::getTile(int x, int y) const {
+    if (!inBounds(x, y)) return '#';
+    return data[y][x];
+}
+
+void Map::setTile(int x, int y, char tile) {
+    if (!inBounds(x, y)) return;
+    data[y][x] = tile;
+}
