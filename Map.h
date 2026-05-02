@@ -9,6 +9,9 @@ public:
     // 从文件加载地图，返回是否成功
     bool loadFromFile(const std::string& filename);
 
+    // 从二维字符网格加载（行可不等长，会右侧补空格对齐）
+    bool loadFromGrid(std::vector<std::vector<char>> grid);
+
     // 将地图输出到控制台，px,py 为玩家坐标，gx,gy 为幽灵坐标
     void display(int px, int py, int gx, int gy) const;
 
@@ -40,6 +43,8 @@ public:
 private:
     // data[y][x] 表示第 y 行第 x 列字符
     std::vector<std::vector<char>> data;
+    int width = 0;
+    int height = 0;
 
     // 内部安全访问：如果坐标越界返回 false
     bool inBounds(int x, int y) const;

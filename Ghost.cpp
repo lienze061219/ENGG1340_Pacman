@@ -31,51 +31,46 @@ void Ghost::moveRandomly(const Map& m) {
 std::pair<int,int> Ghost::bfsNextStep(const Map& m, int tx, int ty) const {
     int w = m.getWidth(), h = m.getHeight();
     
-    // 校验目标点（玩家）是否在合法范围内
     if (tx < 0 || tx >= w || ty < 0 || ty >= h) return {x, y};
-    // 校验起点（幽灵自身）是否在合法范围内
     if (x < 0 || x >= w || y < 0 || y >= h) return {x, y};
+    if (x == tx && y == ty) return {x, y};
 
     std::vector<std::vector<bool>> vis(h, std::vector<bool>(w, false));
-    std::vector<std::vector<std::pair<int,int>>> parent(h, std::vector<std::pair<int,int>>(w, {-1,-1}));
-    
-    std::queue<std::pair<int,int>> q;
-    q.push({x, y});
+    std::vector<std::vector<std::pair<int,int>>> parent(h, std::vector<std::pair<int,int>>(w, {-1, -1}));
+    std::vector<std::pair<int,int>> q;
+    q.reserve(static_cast<size_t>(w) * static_cast<size_t>(h));
+
+    q.emplace_back(x, y);
     vis[y][x] = true;
 
-    int dx[] = {0,0,-1,1}, dy[] = {-1,1,0,0};
-    bool found = false;
+    const int dx[] = {0, 0, -1, 1};
+    const int dy[] = {-1, 1, 0, 0};
+    size_t qi = 0;
 
-    while (!q.empty()) {
-        auto cur = q.front(); q.pop();
+    while (qi < q.size()) {
+        auto cur = q[qi++];
         int cx = cur.first, cy = cur.second;
-        if (cx == tx && cy == ty) {
-            found = true;
-            break;
-        }
+        if (cx == tx && cy == ty) break;
         for (int i = 0; i < 4; ++i) {
-            int nx = cx + dx[i], ny = cy + dy[i];
-            // 显式的边界检查，防止 vis[ny][nx] 越界
+            int nx = cx + dx[i];
+            int ny = cy + dy[i];
             if (nx >= 0 && nx < w && ny >= 0 && ny < h && m.isSafe(nx, ny) && !vis[ny][nx]) {
                 vis[ny][nx] = true;
                 parent[ny][nx] = {cx, cy};
-                q.push({nx, ny});
+                q.emplace_back(nx, ny);
             }
         }
     }
 
-    // 如果没找到路径，不执行回溯，直接返回原地或随机
-    if (!found) return {x, y};
+    if (!vis[ty][tx]) return {x, y};
 
     int cx = tx, cy = ty;
-    // 回溯直到找到起点的下一步
     while (parent[cy][cx].first != -1) {
-        std::pair<int,int> p = parent[cy][cx];
+        auto p = parent[cy][cx];
         if (p.first == x && p.second == y) return {cx, cy};
         cx = p.first;
         cy = p.second;
     }
-    
     return {x, y};
 }
 
