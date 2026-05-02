@@ -435,6 +435,7 @@ void drawCenteredLineBlock(int rows, int cols, int startRow, const std::vector<s
 // 纯线条宝箱：关盖为梯形盖 + 箱体 + 包角；开盖为后掀盖 + 露膛与金币轮廓（统一行宽便于居中）
 void drawLineArtChestOnly(int rows, int cols) {
     const std::vector<std::string> closed = {
+<<<<<<< HEAD
        "             ******       ******             ",
     "           **      **   **      **           ",
     "         **          **           **         ",
@@ -446,6 +447,18 @@ void drawLineArtChestOnly(int rows, int cols) {
     "               **           **               ",
     "                 **       **                 ",
     "                   *******                   "
+=======
+        "            _________________________            ",
+        "           /                         \\           ",
+        "          /___________________________\\          ",
+        "         |_____________________________|         ",
+        "         |         +---------+         |         ",
+        "         |         |   $     |         |         ",
+        "         |         +---------+         |         ",
+        "         |                             |         ",
+        "         |_____________________________|         ",
+        "              \\___/               \\___/              ",
+>>>>>>> c0fd6f4293ca85bf4ce8c1c77d26e9922d30b5c1
     };
     int startRow = std::max(1, rows / 2 - static_cast<int>(closed.size() / 2));
     drawCenteredLineBlock(rows, cols, startRow, closed, BOLD + BRIGHT_YELLOW);
@@ -453,6 +466,7 @@ void drawLineArtChestOnly(int rows, int cols) {
 
 void drawLineArtChestOpen(int rows, int cols) {
     const std::vector<std::string> open = {
+<<<<<<< HEAD
        "             ******       ******             ",
     "           **      **   **      **           ",
     "         **          **           **         ",
@@ -464,6 +478,18 @@ void drawLineArtChestOpen(int rows, int cols) {
     "               **           **               ",
     "                 **       **                 ",
     "                   *******                   "
+=======
+        "              ___________________              ",
+        "             /                   \\             ",
+        "            /_____________________\\            ",
+        "           /                       \\           ",
+        "          /_______________________\\_______     ",
+        "         |                             |    ",
+        "         |        (   $ $ $   )        |    ",
+        "         |       /~~~~~~~~~~~~~\\       |    ",
+        "         |       \\_____________/       |    ",
+        "         |_______________________________|    ",
+>>>>>>> c0fd6f4293ca85bf4ce8c1c77d26e9922d30b5c1
     };
     int startRow = std::max(1, rows / 2 - static_cast<int>(open.size() / 2));
     drawCenteredLineBlock(rows, cols, startRow, open, BOLD + BRIGHT_YELLOW);
@@ -1099,7 +1125,11 @@ const CellGlyph GLYPH_WALL_BREAK_1 = {{"***", " * ", "***"}};
 const CellGlyph GLYPH_EMPTY = {{"   ", "   ", "   "}};
 const CellGlyph GLYPH_BEAN = {{"   ", " . ", "   "}};
 const CellGlyph GLYPH_BIG = {{" O ", "OOO", " O "}};
+<<<<<<< HEAD
 const CellGlyph GLYPH_CHEST = {{"(V)", "\\ /", " v "}};
+=======
+const CellGlyph GLYPH_CHEST = {{"+-+", "|$|", "+-+"}};
+>>>>>>> c0fd6f4293ca85bf4ce8c1c77d26e9922d30b5c1
 const CellGlyph GLYPH_SUPER = {{"@@@", "@S@", "@@@"}};
 // 幽灵：圆弧顶 + 身体 + 波浪底（类似原作剪影）
 const CellGlyph GLYPH_GHOST = {{"/^\\", "@@@", "vVv"}};
@@ -1588,12 +1618,20 @@ int main() {
                                                    nextPulseStunAt);
                                 }
                             } else if (tile == 'C') {
+<<<<<<< HEAD
                                 score += 50;
+=======
+                                hp = std::min(maxHp, hp + 1);
+                                score += 80;
+>>>>>>> c0fd6f4293ca85bf4ce8c1c77d26e9922d30b5c1
                                 gameMap.setTile(playerX, playerY, ' ');
                                 playChestAnimation(gameMap.getWidth(), gameMap.getHeight());
                             } else if (tile == 'S') {
                                 gameMap.setTile(playerX, playerY, ' ');
+<<<<<<< HEAD
                                 speedBoostOn = true;
+=======
+>>>>>>> c0fd6f4293ca85bf4ce8c1c77d26e9922d30b5c1
                                 boostEndTime = frameStart + superDuration;
                                 score += 120;
                             }
@@ -1735,8 +1773,16 @@ int main() {
                         if (frameStart < ghost.eliminatedUntil) break;
                         if (speedBoostOn) {
                             score += 200;
+<<<<<<< HEAD
                             speedBoostOn = false;
                             ghost.eliminatedUntil = frameStart + std::chrono::seconds(5);
+=======
+                            ghost.x = ghost.spawnX;
+                            ghost.y = ghost.spawnY;
+                            ghost.stunnedUntil = std::chrono::steady_clock::time_point{};
+                            ghost.eliminatedUntil = std::chrono::steady_clock::time_point{};
+                            ghost.lastMoveTime = frameStart + std::chrono::milliseconds(300);
+>>>>>>> c0fd6f4293ca85bf4ce8c1c77d26e9922d30b5c1
                         } else if (frameStart < ghost.stunnedUntil) {
                             break;
                         } else if (!playerInvincible) {

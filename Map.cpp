@@ -55,10 +55,13 @@ void Map::display(int px, int py, int gx, int gy) const {
             } else if (x == gx && y == gy) {
                 std::cout << 'G';
 <<<<<<< HEAD
+<<<<<<< HEAD
             } else if (data[y][x] == 'C') {
                 std::cout << "\033[31m" << 'V' << "\033[0m";
 =======
 >>>>>>> 7552c4788dbe659f055cd2d792e062ca0fb29456
+=======
+>>>>>>> c0fd6f4293ca85bf4ce8c1c77d26e9922d30b5c1
             } else {
                 std::cout << data[y][x];
             }

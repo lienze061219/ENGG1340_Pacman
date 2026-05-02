@@ -5,6 +5,7 @@ Player::Player(int startX, int startY) {
     y = startY;
 }
 
+<<<<<<< HEAD
 /**
  * @brief 处理玩家移动的核心逻辑
  * @param input 用户输入的按键 (w, a, s, d)
@@ -17,6 +18,12 @@ void Player::move(char input, Map &m) {
     int nextY = y;
 
     // 根据输入的方向计算目标位置
+=======
+void Player::move(char input, Map &m) {
+    int nextX = x;
+    int nextY = y;
+
+>>>>>>> c0fd6f4293ca85bf4ce8c1c77d26e9922d30b5c1
     if (input == 'w') {
         nextY = y - 1;
     } else if (input == 's') {
