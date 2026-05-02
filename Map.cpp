@@ -5,8 +5,8 @@
 
 // 辅助：检查坐标是否在地图范围内
 bool Map::inBounds(int x, int y) const {
-    if (y < 0 || y >= height) return false;
-    if (x < 0 || x >= width) return false;
+    if (y < 0 || y >= static_cast<int>(data.size())) return false;
+    if (x < 0 || x >= static_cast<int>(data[y].size())) return false;
     return true;
 }
 
@@ -24,58 +24,51 @@ bool Map::loadFromFile(const std::string& filename) {
     }
     in.close();
 
+    // 如果某些行长度不一致，可以选择填充空格使矩阵更规整
     size_t maxlen = 0;
     for (const auto& row : data) if (row.size() > maxlen) maxlen = row.size();
     for (auto& row : data) {
         if (row.size() < maxlen) row.resize(maxlen, ' ');
     }
 
-    height = static_cast<int>(data.size());
-    width = static_cast<int>(maxlen);
     return !data.empty();
 }
 
 bool Map::loadFromGrid(std::vector<std::vector<char>> grid) {
     data = std::move(grid);
-    if (data.empty()) {
-        width = 0;
-        height = 0;
-        return false;
-    }
+    if (data.empty()) return false;
     size_t maxlen = 0;
     for (const auto& row : data) if (row.size() > maxlen) maxlen = row.size();
     for (auto& row : data) {
         if (row.size() < maxlen) row.resize(maxlen, ' ');
     }
-    height = static_cast<int>(data.size());
-    width = static_cast<int>(maxlen);
     return true;
 }
 
 void Map::display(int px, int py, int gx, int gy) const {
-    std::string row;
-    row.reserve(width > 0 ? width : 16);
-    for (int y = 0; y < height; ++y) {
-        row.clear();
-        for (int x = 0; x < width; ++x) {
+    for (int y = 0; y < static_cast<int>(data.size()); ++y) {
+        for (int x = 0; x < static_cast<int>(data[y].size()); ++x) {
             if (x == px && y == py && x == gx && y == gy) {
-                row.push_back('X');
+                std::cout << 'X'; // 玩家与幽灵同格，表示碰撞
             } else if (x == px && y == py) {
-                row.push_back('P');
+                std::cout << 'P';
             } else if (x == gx && y == gy) {
-                row.push_back('G');
+                std::cout << 'G';
             } else {
-                row.push_back(data[y][x]);
+                std::cout << data[y][x];
             }
         }
-        std::cout << row << '\n';
+        std::cout << '\n';
     }
 }
 
 bool Map::isSafe(int x, int y) const {
     if (!inBounds(x, y)) return false;
-    // 约定 '#' 为墙，其他字符均可通行
-    return data[y][x] != '#';
+    char c = data[y][x];
+    // '#' 旧墙、'=' 外围不可破坏墙、'1'-'5' 可破坏墙均为阻挡
+    if (c == '#' || c == '=') return false;
+    if (c >= '1' && c <= '5') return false;
+    return true;
 }
 
 void Map::eatBean(int x, int y) {
@@ -87,11 +80,12 @@ void Map::eatBean(int x, int y) {
 }
 
 int Map::getWidth() const {
-    return width;
+    if (data.empty()) return 0;
+    return static_cast<int>(data[0].size());
 }
 
 int Map::getHeight() const {
-    return height;
+    return static_cast<int>(data.size());
 }
 
 int Map::countBeans() const {

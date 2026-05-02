@@ -43,8 +43,6 @@ public:
 private:
     // data[y][x] 表示第 y 行第 x 列字符
     std::vector<std::vector<char>> data;
-    int width = 0;
-    int height = 0;
 
     // 内部安全访问：如果坐标越界返回 false
     bool inBounds(int x, int y) const;
