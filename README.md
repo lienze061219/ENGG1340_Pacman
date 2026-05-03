@@ -10,7 +10,7 @@ Yang Chenyu(ycygoodgood)
 
 Li Yang(Jimmy88641)
 
-He Jinliang(rudeus6969)
+He Jinliang(rudeus69)
 
 Project Overview
 This project is a console-based Pac-Man game developed in C++. It focuses on handling real-time keyboard input and dynamic map rendering within a Unix-like terminal. The core of the project demonstrates the practical application of Object-Oriented Programming (OOP), standard data structures, and fundamental search algorithms.
